@@ -6,7 +6,7 @@ interface IERC20 {
     function balanceOf(address account) external view returns (uint256);
 }
 
-contract Election {
+contract VotingSystem {
     address public owner;
     IERC20 public votingToken;
 
