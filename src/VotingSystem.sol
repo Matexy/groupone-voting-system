@@ -10,14 +10,16 @@ contract VotingSystem {
     address public owner;
     IERC20 public votingToken;
 
-    /// @notice Election structure as required
+    // Logic to handle multiple elections ---
+    uint256 public currentElectionId;
+    mapping(address => uint256) private lastVotedElectionId;
+
     struct ElectionData {
-        string title;                 // Election title
-        string[] candidates;          // List of candidates
-        uint256 endTime;              // Voting end time (timestamp)
-        bool active;                  // Election status
-        uint256[] voteCounts;         // Votes per candidate
-        mapping(address => bool) voted; // Tracks if address has voted
+        string title;                 
+        string[] candidates;          
+        uint256 endTime;              
+        bool active;                  
+        uint256[] voteCounts;         
     }
 
     ElectionData private election;
@@ -38,10 +40,6 @@ contract VotingSystem {
         votingToken = IERC20(_tokenAddress);
     }
 
-    /// @notice Creates a new election
-    /// @param _title Title of the election
-    /// @param _candidates List of candidates
-    /// @param _duration Duration of election in seconds
     function createElection(
         string memory _title,
         string[] memory _candidates,
@@ -49,6 +47,9 @@ contract VotingSystem {
     ) external onlyOwner {
         require(!election.active, "Election already active");
         require(_candidates.length > 1, "At least 2 candidates required");
+
+        // Increment ID so previous voters can vote again
+        currentElectionId++;
 
         delete election.candidates;
         delete election.voteCounts;
@@ -63,29 +64,29 @@ contract VotingSystem {
         }
     }
 
-    /// @notice Vote for a candidate by index
-    /// @param candidateIndex Index of the candidate
-    function vote(uint256 candidateIndex) external electionActive {
-        require(!election.voted[msg.sender], "Already voted");
-        require(candidateIndex < election.candidates.length, "Invalid candidate");
-        require(
-            votingToken.balanceOf(msg.sender) > 0,
-            "Must hold voting token"
-        );
-
-        election.voteCounts[candidateIndex] += 1;
-        election.voted[msg.sender] = true;
+    function endElection() external onlyOwner {
+        election.active = false;
     }
 
-    /// @notice Returns vote counts for all candidates
+    function vote(uint256 candidateIndex) external electionActive {
+        // Checks against the CURRENT election ID
+        require(lastVotedElectionId[msg.sender] != currentElectionId, "Already voted");
+        
+        require(candidateIndex < election.candidates.length, "Invalid candidate");
+        require(votingToken.balanceOf(msg.sender) > 0, "Must hold voting token");
+
+        election.voteCounts[candidateIndex] += 1;
+        
+        // Update their record to the CURRENT election ID
+        lastVotedElectionId[msg.sender] = currentElectionId;
+    }
+
     function getResults() external view returns (uint256[] memory) {
         return election.voteCounts;
     }
 
-    /// @notice Returns the index of the winning candidate
     function getWinner() external view returns (uint256 winnerIndex) {
         uint256 highestVotes = 0;
-
         for (uint256 i = 0; i < election.voteCounts.length; i++) {
             if (election.voteCounts[i] > highestVotes) {
                 highestVotes = election.voteCounts[i];
@@ -94,9 +95,7 @@ contract VotingSystem {
         }
     }
 
-    /// @notice Checks if an address has voted
-    /// @param voter Address to check
     function hasVoted(address voter) external view returns (bool) {
-        return election.voted[voter];
+        return lastVotedElectionId[voter] == currentElectionId;
     }
 }

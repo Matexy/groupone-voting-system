@@ -1,98 +1,126 @@
-🗳️ Simple Voting System (TechCrush Airdrop Token – TCT)
-📌 Deployed Contract Addresses
-Contract Name	                        Network	                           Address
-TechCrush Airdrop Token (TCT)	        Sepolia	                      PASTE_TOKEN_ADDRESS_HERE
-Voting System Contract	                Sepolia	                      PASTE_VOTING_CONTRACT_ADDRESS_HERE
 
+# 🗳️ Simple Voting System (Group One) 
 
-📝 Project Overview
+A secure, blockchain-based voting application where eligibility is determined by holding the **TechCrush Airdrop Token (TCT)**. This system allows for transparent election creation, voting, and result tallying on the Ethereum blockchain.
 
-This project is a transparent, tamper-proof voting system built on the Ethereum blockchain using Foundry.
+## 📍 Deployed Contracts (Anvil Localnet)
 
-It consists of two main smart contracts:
+| Contract Name | Address |
+| :--- | :--- |
+| **Voting System** | `0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512` |
+| **TechCrush Token (TCT)** | `0x5FbDB2315678afecb367f032d93F642f64180aa3` |
 
-ElectionToken (TCT)
-An ERC20 token called TechCrush Airdrop Token (TCT) used for governance and voting rights.
+---
 
-VotingSystem
-A smart contract that manages elections and only allows users who hold TCT tokens to vote.
+## 🚀 Key Features
 
-This system ensures that:
+* **Token-Gated Voting:** Only users holding **TCT** tokens can vote.
+* **One Person, One Vote:** Strict checks ensure a user cannot vote twice in the same election.
+* **Consecutive Elections:** *[NEW]* Fixed logic allows the system to run multiple elections back-to-back. Voter status resets automatically when a new election starts.
+* **Time-Bound:** Elections automatically close after the specified deadline.
 
-Only token holders can vote
+---
 
-Each address can vote only once per election
+## 🧪 Testing & Coverage
 
-Results are publicly verifiable on-chain
+We achieved **100% Test Coverage** on the Voting System logic, ensuring all scenarios (winning, double voting, time limits) are handled correctly.
 
+### Run Tests
+To verify our test results:
+```bash
+forge test
 
-🗳️ Election Used for Testing
+```
 
-For the final test and deployment, we created an election titled:
+### Coverage Report
 
-"Best Programming Language"
+To see the coverage metrics:
 
-Candidates
-Index	Name
-  0	    Solidity
-  1	    Rust
-  2	    JavaScript
+```bash
+forge coverage
 
+```
 
-Voting Logic
+**Results:**
 
-Each wallet address can vote once
+* ✅ **VotingSystem.sol:** 100% Line Coverage / 100% Function Coverage
+* ✅ **ElectionToken.sol:** Verified Metadata & Supply
 
-A user must hold TCT tokens to vote
+---
 
-Votes are counted on-chain
+## 📜 How It Works (Election Cycle)
 
-The election closes automatically when the deadline is reached
+### 1. Setup
 
+The deployment script creates the **TechCrush Airdrop Token (TCT)** with an initial supply of **1,000,000 TCT**. These tokens are distributed to voters to give them "voting power."
 
-Determining the Winner
+### 2. Creating an Election
 
-The getWinner() function loops through all vote counts and returns the candidate with the highest number of votes.
+The owner creates a new election with a list of candidates and a time limit.
 
-In our test run, Solidity won by receiving the highest number of votes.
+* **Example:** "Class President"
+* **Candidates:** `['Alice', 'Bob', 'Charlie']`
+* **Duration:** 1 Day
 
+### 3. Voting
 
-🛠️ Functions Implemented
+Token holders call the `vote(candidateIndex)` function.
 
-The following required functions were implemented:
+* **Rule:** Must hold > 0 TCT.
+* **Rule:** Can only vote once per election ID.
 
-createElection() – Allows the contract owner to create a new election
+### 4. Results
 
-vote(uint candidateIndex) – Cast a vote for a candidate
+Anyone can call `getResults()` or `getWinner()` to see the live tally.
 
-getResults() – Returns the vote counts for all candidates
+* **Winner Determination:** The contract automatically calculates which index has the highest vote count.
 
-getWinner() – Returns the name of the winning candidate
+---
 
-hasVoted(address voter) – Checks if an address has already voted
+## 🛠️ Technical Stack
 
+* **Language:** Solidity ^0.8.30
+* **Framework:** Foundry (Forge, Anvil, Script)
+* **Token Standard:** ERC20
 
-✅ Testing Checklist
+## 🔧 Installation & Deployment
 
-All required behaviors were verified using Foundry tests:
+**1. Clone the Repository**
 
- Election can be created by the owner
+```bash
+git clone [https://github.com/matexy/groupone-voting-system](https://github.com/matexy/groupone-voting-system)
+cd groupone-voting-system
 
- Multiple addresses can vote
+```
 
- Double voting is prevented
+**2. Install Dependencies**
 
- Voting stops after the deadline
+```bash
+forge install
 
- Winner is correctly determined
- 
+```
 
-⚙️ How to Run Locally
-1. Install Dependencies
-forge install OpenZeppelin/openzeppelin-contracts
+**3. Deploy to Local Blockchain (Anvil)**
 
-2. Run Tests
-forge test -vv
+```bash
+# Start Anvil in a separate terminal
+anvil
 
-3. Deploy Contracts
-forge script script/DeployVoting.s.sol --rpc-url <YOUR_RPC_URL> --private-key <YOUR_PRIVATE_K
+# Deploy Script
+forge script script/DeployVoting.s.sol --fork-url [http://127.0.0.1:8545](http://127.0.0.1:8545) --broadcast --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+
+```
+
+```
+
+---
+
+### **Final Step: Push to GitHub**
+Once you have pasted and saved the file above, run these last commands in your terminal to finish everything:
+
+```bash
+git add README.md
+git commit -m "Update README with deployed addresses and project info"
+git push origin main
+
+```
